@@ -32,7 +32,7 @@ services:
       - ./postgres_data:/var/lib/postgresql/data
 
   storage:
-      build: ./minio
+      image: minio/minio:latest
       ports:
         - "9000:9000" # Port dla aplikacji (backendu)
         - "9001:9001" # Port dla Twojej przeglądarki (Web UI)
@@ -41,7 +41,8 @@ services:
         MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
 
       volumes:
-        - ./minio/minio_data:/app/minio/minio_data
+        - ./minio_data:/data 
+      command: server /data --console-address ":9001"
 volumes:
   postgres_data:
   minio_data:
