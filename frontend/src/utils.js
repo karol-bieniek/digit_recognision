@@ -4,7 +4,7 @@ export const getCanvasBlob = (canvas, format = 'image/png') => {
       if (blob) {
         resolve(blob);
       } else {
-        reject(new Error('Płótno jest puste!'));
+        reject(new Error('Canvas is empty!'));
       }
     }, format);
   });

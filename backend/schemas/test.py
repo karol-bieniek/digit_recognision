@@ -1,11 +1,11 @@
 # from pydantic import BaseModel, EmailStr
 
-# # Dane, których wymagamy przy tworzeniu użytkownika (Request)
+# # Data required when creating a user (Request)
 # class UserCreate(BaseModel):
 #     username: str
 #     email: str
 
-# # Dane, które zwracamy użytkownikowi (Response) - dodajemy wygenerowane przez bazę ID
+# # Data returned to the user (Response) - includes generated database ID
 # class UserResponse(BaseModel):
 #     id: int
 #     username: str
@@ -13,5 +13,5 @@
 #     is_active: bool
 
 #     class Config:
-#         # Informuje Pydantica, żeby potrafił czytać dane bezpośrednio z modeli SQLAlchemy
+#         # Tells Pydantic to read data directly from SQLAlchemy models
 #         from_attributes = True

@@ -29,19 +29,19 @@ NN_MODEL = NeuralNetwork().to(device)
 NN_MODEL.load_state_dict(torch.load("backend/model.pth", map_location=torch.device('cpu'), weights_only=True))
 
 preprocess = transforms.Compose([
-    transforms.Grayscale(num_output_channels=1), # Zmiana na 1 kanał (czarno-biały)
-    transforms.Resize((28, 28)),                 # Wymuszenie rozmiaru 28x28
-    transforms.ToTensor(),                       # Zmienia na Tensor o wartościach [0.0, 1.0]    
+    transforms.Grayscale(num_output_channels=1), # Convert to 1 channel (black and white)
+    transforms.Resize((28, 28)),                 # Force size to 28x28
+    transforms.ToTensor(),                       # Convert to tensor with values in [0.0, 1.0]
 ])
 
 
 def predict_digit(img_bytes) -> tuple[int, float]:
     
     with Image.open(io.BytesIO(img_bytes)) as img:
-        # Konwersja RGBA do RGB z wymuszonym białym tłem
+        # Convert RGBA to RGB with forced white background
         if img.mode == 'RGBA':
             background = Image.new("RGB", img.size, (255, 255, 255))
-            background.paste(img, mask=img.split()[3]) # Nakładamy używając maski alpha
+            background.paste(img, mask=img.split()[3]) # Apply using alpha mask
             img = background
         elif img.mode != 'RGB':
             img = img.convert('RGB')
@@ -50,8 +50,8 @@ def predict_digit(img_bytes) -> tuple[int, float]:
 
         img_tensor = 1.0 - img_tensor
 
-        img_tensor = img_tensor.unsqueeze(0) # dodaje nawias po oczekujemy paczki danych (1 paczka w ty przypadku) 
-        img_tensor = img_tensor.to(device)   # BO MODEL JEST JEST NA GPU
+        img_tensor = img_tensor.unsqueeze(0) # add batch dimension (1 batch in this case)
+        img_tensor = img_tensor.to(device)   # model runs on selected accelerator/cpu
 
 
         NN_MODEL.eval()
@@ -59,7 +59,7 @@ def predict_digit(img_bytes) -> tuple[int, float]:
             logits = NN_MODEL(img_tensor)
             probabilities = torch.softmax(logits, dim=1)
             prediction = torch.argmax(probabilities, dim=1).item()
-            confidence = probabilities[0][prediction].item()    # 0 bo torch zawsze zakłada praca na batchu danych
+            confidence = probabilities[0][prediction].item()    # index 0 because torch output is batched
 
 
         confidence = round(confidence*100, 2)
@@ -82,7 +82,7 @@ def save_img(img_bytes: bytes, prediction: int, confidence: float, correct_digit
     img_size = len(img_bytes)
 
     try:
-        # 4. Wysyłamy plik do MinIO
+        # 4. Upload file to MinIO
         minio_client.put_object(
             bucket_name=BUCKET_NAME,
             object_name=drawing_name,
@@ -96,13 +96,13 @@ def save_img(img_bytes: bytes, prediction: int, confidence: float, correct_digit
         db.commit()
         
     except S3Error as e:
-        print(f"Błąd zapisu w MinIO: {e}")
+        print(f"MinIO write error: {e}")
         raise
 
     except SQLAlchemyError as e:
-        # 3. Jeśli BAZA DANYCH wyrzuci błąd, cofamy transakcję, żeby jej nie zablokować!
+        # 3. If DATABASE raises an error, roll back transaction to avoid blocking it
         db.rollback() 
-        print(f"Błąd bazy danych (SQLAlchemy): {e}")
+        print(f"Database error (SQLAlchemy): {e}")
         raise
 
 
@@ -111,16 +111,16 @@ def retrain_model(db: Session):
     correct_predictions = db.query(Predictions).filter(Predictions.is_correct == True).all()
     incorrect_predictions = db.query(Predictions).filter(Predictions.is_correct == False).all()
 
-    # Ustalenie proporcji: 4 poprawne predykcje na 1 błędną
+    # Set ratio: 4 correct predictions for 1 incorrect one
     num_incorrect = len(incorrect_predictions) # 
-    num_correct_needed = num_incorrect * 4     # proporacja 4:1 (poprawne:błędne)
+    num_correct_needed = num_incorrect * 4     # 4:1 ratio (correct:incorrect)
 
     if len(correct_predictions) < num_correct_needed:
-        print(f"Uwaga: Za mało poprawnych predykcji. Biorę wszystkie dostępne ({len(correct_predictions)}).")
+        print(f"Warning: Not enough correct predictions. Using all available ({len(correct_predictions)}).")
         num_correct_needed = len(correct_predictions)
 
     sampled_correct = random.sample(correct_predictions, num_correct_needed)
-    # Przygotowanie danych do trenowania modelu
+    # Prepare data for model training
     X_correct = []
     y_correct = []
 
@@ -144,7 +144,7 @@ def retrain_model(db: Session):
 
 
     if len(X_correct) == 0 or len(X_incorrect) == 0:
-        print("Nie ma wystarczającej liczby danych do treningu. Proces retrainowania został przerwany.")
+        print("Not enough data for training. Retraining process was stopped.")
         return
 
     dataset_correct = TensorDataset(torch.stack(X_correct), torch.stack(y_correct))

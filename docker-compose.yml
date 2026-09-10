@@ -1,4 +1,4 @@
-version: '3.8' # 'latest' nie jest poprawną wersją docker-compose, używamy standardowej 3.8
+version: '3.8' # 'latest' is not a valid docker-compose version, use standard 3.8
 services:
 
   frontend:
@@ -22,20 +22,20 @@ services:
   database:
     image: postgres:15.3-alpine
     ports:
-      - "5433:5432"  # Dzięki temu możesz łączyć się z bazą np. przez DBeaver na porcie 5432
+      - "5433:5432"  # Allows connecting to the database, e.g. with DBeaver
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      # BIND MOUNT: Zapisuje dane bezpośrednio w folderze 'postgres_data' na Twoim WSL
+      # BIND MOUNT: Saves data directly in the local 'postgres_data' folder
       - ./postgres_data:/var/lib/postgresql/data
 
   storage:
       image: minio/minio:latest
       ports:
-        - "9000:9000" # Port dla aplikacji (backendu)
-        - "9001:9001" # Port dla Twojej przeglądarki (Web UI)
+        - "9000:9000" # Port for the application (backend)
+        - "9001:9001" # Port for browser access (Web UI)
       environment:
         MINIO_ROOT_USER: ${MINIO_LOGIN}
         MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}

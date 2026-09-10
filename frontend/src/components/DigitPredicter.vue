@@ -7,7 +7,7 @@ import { getCanvasBlob } from '../utils';
 
 
 
-// Predykcje modelu 
+// Model predictions
 const prediction = ref(null);
 const confidence = ref(null);
 
@@ -25,24 +25,24 @@ const clearCanvas = () => {
 }
 
 
-// Wysyłanie rysunku do backendu
+// Send drawing to backend
 const uploadImage = async () => {
   const canvas = canvasActions.value.getCanvas();
   try {
       const imageBlob = await getCanvasBlob(canvas);
       const formData = new FormData();
-      formData.append('drawing', imageBlob, 'rysunek-uzytkownika.png');
+      formData.append('drawing', imageBlob, 'user-drawing.png');
 
       const response = await sendImgDigit(formData);
       if (response !== null) {
         prediction.value = response.prediction;
         confidence.value = response.confidence;
       } else {
-        alert('Błąd podczas wysyłania (Serwer zwrócił błąd).');
+        alert('Upload failed (server returned an error).');
       }
 
   } catch (error) {
-    console.error('Błąd sieci:', error);
+    console.error('Network error:', error);
   }
 };
 
@@ -52,22 +52,22 @@ const handleYes = async () => {
   const imageBlob = await getCanvasBlob(canvas);
 
   const formData = new FormData();
-  formData.append('drawing', imageBlob, 'rysunek-uzytkownika.png');
+  formData.append('drawing', imageBlob, 'user-drawing.png');
   formData.append('prediction', prediction.value);
   formData.append('confidence', confidence.value);
-  const correctDigit = prediction.value; // Jeśli użytkownik potwierdza, to poprawna cyfra to ta, którą przewidział model
+  const correctDigit = prediction.value; // If the user confirms, the correct digit is the one predicted by the model
   formData.append('correct_digit', correctDigit);
   
 
   try {
       const response = await saveCanvas(formData);
       if (response === null) {
-          alert("Błąd serwera");
+          alert("Server error");
       } else {
-        console.log("Predykcja zapisana w bazie danych");
+        console.log("Prediction saved in the database");
       }
   } catch (error) {
-      console.error('Błąd sieci:', error);
+      console.error('Network error:', error);
   }
 
   isReview.value = false;
@@ -84,7 +84,7 @@ const handleNo = () => {
 const handleReview = async () => {
 
   if (!prediction.value || !confidence.value) {
-    alert("Nie przepowadzaono predykcji!");
+    alert("No prediction has been made yet!");
     return;
   }
 
@@ -93,20 +93,20 @@ const handleReview = async () => {
   try {
     const imageBlob = await getCanvasBlob(canvas);
     const formData = new FormData();
-    formData.append('drawing', imageBlob, 'rysunek.png');
+    formData.append('drawing', imageBlob, 'drawing.png');
     formData.append('prediction', prediction.value);
     formData.append('confidence', confidence.value);
     formData.append('correct_digit', correctNumber.value);
 
     const response = await saveCanvas(formData);
     if (response === null) {
-      alert("Błąd serwera");
+      alert("Server error");
     } else {
       isReview.value = false;
       isSuccess.value = true;
     }
   } catch (error) {
-    console.error('Błąd sieci:', error);
+    console.error('Network error:', error);
   }
 }
 
@@ -116,7 +116,7 @@ const handleRetrain = async () => {
   try {
     await retrain();
   } catch (error) {
-    console.log("Błąd przy trenowaniu: ", error);
+    console.log("Training error: ", error);
   } finally {
     isRetraining.value = false; 
   }
@@ -126,32 +126,32 @@ const handleRetrain = async () => {
 
 <template>
   <div class="main-wrapper">
-    <!-- Sekcja kanwy i rysowania -->
+    <!-- Canvas and drawing section -->
     <div class="canvas-section">
-      <h2 class="section-title">Rozpoznawanie Cyfr</h2>
-      <p class="subtitle">Narysuj cyfrę myszką na płótnie poniżej</p>
+      <h2 class="section-title">Digit Recognition</h2>
+      <p class="subtitle">Draw a digit with your mouse on the canvas below</p>
       
       <Canvas ref="canvasActions" class="canvas-element"/>
 
-      <!-- Przyciski kontroli kanwy -->
+      <!-- Canvas control buttons -->
       <div class="controls">
         <button @click="clearCanvas" class="btn btn-clear">
-          <span class="btn-icon">✕</span> Wyczyść
+          <span class="btn-icon">✕</span> Clear
         </button>
         <button @click="uploadImage" class="btn btn-save">
-          <span class="btn-icon">✓</span> Wyślij do analizy
+          <span class="btn-icon">✓</span> Analyze
         </button>
       </div>
 
-      <!-- Wyniki predykcji -->
+      <!-- Prediction results -->
       <div class="prediction-section" v-if="prediction !== null">
         <div class="prediction-box">
           <div class="prediction-result">
-            <span class="result-label">Rozpoznana cyfra:</span>
+            <span class="result-label">Recognized digit:</span>
             <span class="result-value">{{ prediction }}</span>
           </div>
           <div class="confidence-bar">
-            <span class="confidence-label">Pewność predykcji:</span>
+            <span class="confidence-label">Prediction confidence:</span>
             <div class="confidence-container">
               <div class="confidence-fill" :style="{ width: confidence + '%' }"></div>
               <span class="confidence-text">{{ confidence }}%</span>
@@ -161,44 +161,44 @@ const handleRetrain = async () => {
       </div>
     </div>
 
-    <!-- Modal oceny predykcji -->
+    <!-- Prediction review modal -->
     <div class="modal-overlay" v-if="prediction !== null">
       <div class="modal-content">
 
-        <h3 class="modal-title" v-if="!isReview && !isSuccess">Czy cyfra została rozpoznana poprawnie?</h3>
-        <!-- Przyciski Tak/Nie -->
+        <h3 class="modal-title" v-if="!isReview && !isSuccess">Was the digit recognized correctly?</h3>
+        <!-- Yes/No buttons -->
         <div class="modal-actions" v-if="!isReview && !isSuccess">
 
-          <button type="button" @click="handleYes" class="btn btn-success">Tak, jest OK</button>
-          <button type="button" @click="handleNo" class="btn btn-warning">Nie, popraw</button>
+          <button type="button" @click="handleYes" class="btn btn-success">Yes, it's correct</button>
+          <button type="button" @click="handleNo" class="btn btn-warning">No, correct it</button>
         </div>
 
-        <!-- Formularz korekty -->
+        <!-- Correction form -->
         <form @submit.prevent="handleReview" v-if="isReview" class="correction-form">
           <div class="form-group">
-            <label for="correct-number">Jaka cyfra powinna być rozpoznana?</label>
+            <label for="correct-number">Which digit should have been recognized?</label>
             <input 
               id="correct-number" 
               v-model.number="correctNumber" 
               type="number" 
               min="0"
               max="9"
-              placeholder="Wpisz cyfrę (0-9)"
+              placeholder="Enter a digit (0-9)"
               class="form-input"
             />
           </div>
           <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Prześlij korektę</button>
-            <button type="button" @click="isReview = false" class="btn btn-secondary">Anuluj</button>
+            <button type="submit" class="btn btn-primary">Submit correction</button>
+            <button type="button" @click="isReview = false" class="btn btn-secondary">Cancel</button>
           </div>
         </form>
 
-        <!-- Potwierdzenie sukcesu -->
+        <!-- Success confirmation -->
         <div class="success-message" v-if="isSuccess">
-          <p class="success-text">✓ Dziękujemy za potwierdzenie!</p>
-          <p class="success-subtitle">Twoja ocena pomaga w trenowaniu modelu</p>
+          <p class="success-text">✓ Thanks for your feedback!</p>
+          <p class="success-subtitle">Your input helps improve model training</p>
           <div class="success-actions">
-            <button type="button" @click="isSuccess = false; prediction = null" class="btn btn-primary">Zamknij</button>
+            <button type="button" @click="isSuccess = false; prediction = null" class="btn btn-primary">Close</button>
           </div>
         </div>
       </div>
@@ -210,8 +210,8 @@ const handleRetrain = async () => {
           class="btn btn-retrain"
           :disabled="isRetraining"
         >
-          <span v-if="!isRetraining">Przetrenuj model</span>
-          <span v-else>Trenowanie...</span>
+          <span v-if="!isRetraining">Retrain model</span>
+          <span v-else>Training...</span>
         </button>
       </div>
   </div>
@@ -219,7 +219,7 @@ const handleRetrain = async () => {
 
 
 <style scoped>
-/* ==================== GŁÓWNY KONTENER ==================== */
+/* ==================== MAIN CONTAINER ==================== */
 .main-wrapper {
   width: 100%;
   max-width: 1200px;
@@ -229,7 +229,7 @@ const handleRetrain = async () => {
   min-height: 100vh;
 }
 
-/* ==================== SEKCJA KANWY ==================== */
+/* ==================== CANVAS SECTION ==================== */
 .canvas-section {
   background-color: var(--bg-white);
   border-radius: var(--radius);
@@ -256,7 +256,7 @@ const handleRetrain = async () => {
   font-weight: 500;
 }
 
-/* ==================== ELEMENT KANWY ==================== */
+/* ==================== CANVAS ELEMENT ==================== */
 .canvas-element {
   border: 2px solid var(--border-color);
   border-radius: var(--radius);
@@ -270,7 +270,7 @@ const handleRetrain = async () => {
   box-shadow: var(--shadow-md);
 }
 
-/* ==================== PRZYCISKI ==================== */
+/* ==================== BUTTONS ==================== */
 .controls {
   display: flex;
   gap: 1rem;
@@ -330,7 +330,7 @@ const handleRetrain = async () => {
   background-color: #059669;
 }
 
-/* ==================== SEKCJA PREDYKCJI ==================== */
+/* ==================== PREDICTION SECTION ==================== */
 .prediction-section {
   animation: slideIn 0.3s ease;
 }
@@ -357,7 +357,7 @@ const handleRetrain = async () => {
   box-shadow: var(--shadow-md);
 }
 
-/* Wynik predykcji */
+/* Prediction result */
 .prediction-result {
   display: flex;
   flex-direction: column;
@@ -384,7 +384,7 @@ const handleRetrain = async () => {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Pasek pewności */
+/* Confidence bar */
 .confidence-bar {
   display: flex;
   flex-direction: column;
@@ -472,7 +472,7 @@ const handleRetrain = async () => {
   text-align: center;
 }
 
-/* ==================== AKCJE MODALU ==================== */
+/* ==================== MODAL ACTIONS ==================== */
 .modal-actions {
   display: flex;
   gap: 1rem;
@@ -530,7 +530,7 @@ const handleRetrain = async () => {
   background-color: #7c3aed;
 }
 
-/* ==================== FORMULARZ KOREKTY ==================== */
+/* ==================== CORRECTION FORM ==================== */
 .correction-form {
   display: flex;
   flex-direction: column;
@@ -579,7 +579,7 @@ const handleRetrain = async () => {
   flex: 1;
 }
 
-/* ==================== KOMUNIKAT SUKCESU ==================== */
+/* ==================== SUCCESS MESSAGE ==================== */
 .success-message {
   text-align: center;
   padding: 1rem;

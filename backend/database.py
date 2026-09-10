@@ -2,19 +2,19 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 import os
 
-# Format: postgresql://uzytkownik:haslo@host:port/nazwa_bazy
+# Format: postgresql://uzytkownik:haslo@host:port/database_name
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Engine to silnik, który zarządza połączeniami z PostgreSQL
+# Engine manages PostgreSQL connections
 engine = create_engine(DATABASE_URL)
 
-# Klasa sesji - za jej pomocą będziemy wykonywać operacje na bazie
+# Session class used for database operations
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Klasa bazowa, po której będą dziedziczyć nasze modele bazodanowe
+# Base class inherited by database models
 BASE = declarative_base()
 
-# Funkcja pomocnicza (tzw. Dependency) do otwierania/zamykania sesji w endpointach
+# Helper function (dependency) to open/close sessions in endpoints
 def get_db():
     db = SessionLocal()
     try:

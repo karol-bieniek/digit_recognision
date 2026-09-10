@@ -10,34 +10,34 @@ INPUT_IMG_SIZE = (28, 28)
 class NeuralNetwork(nn.Module):
     def __init__(self):
         super().__init__()
-        # Warstwy splotowe (konwolucyjne) analizują obraz w 2D
+        # Convolutional layers analyze the image in 2D
         self.features = nn.Sequential(
-            # 1 kanał wejściowy (skala szarości), 8 filtrów, okno 4x4, padding 1
-            nn.Conv2d(1, 8, kernel_size=4, padding=1), # Wyjście: 8x27x27
+            # 1 input channel (grayscale), 8 filters, 4x4 kernel, padding 1
+            nn.Conv2d(1, 8, kernel_size=4, padding=1), # Output: 8x27x27
             nn.ReLU(),
-            nn.MaxPool2d(2, 2), # Zmniejsza: 27x27 -> 13x13 (używając floor)
+            nn.MaxPool2d(2, 2), # Reduces: 27x27 -> 13x13 (using floor)
 
-            nn.Conv2d(8, 16, kernel_size=4, padding=1), # Wyjście: 16x12x12
+            nn.Conv2d(8, 16, kernel_size=4, padding=1), # Output: 16x12x12
             nn.ReLU(),
-            nn.MaxPool2d(2, 2), # Zmniejsza: 12x12 -> 6x6
+            nn.MaxPool2d(2, 2), # Reduces: 12x12 -> 6x6
 
-            nn.Conv2d(16, 32, kernel_size=4, padding=1), # Wyjście: 32x5x5
+            nn.Conv2d(16, 32, kernel_size=4, padding=1), # Output: 32x5x5
             nn.ReLU(),
-            nn.MaxPool2d(2, 2)  # Zmniejsza: 5x5 -> 2x2 ( floor( (5+0-2)/2 + 1 ) = 2 )
+            nn.MaxPool2d(2, 2)  # Reduces: 5x5 -> 2x2 ( floor( (5+0-2)/2 + 1 ) = 2 )
         )
 
-        # Obliczony spłaszczony rozmiar: 32 kanały * 2 * 2 piksele = 128
+        # Calculated flattened size: 32 channels * 2 * 2 pixels = 128
 
-        # Klasyfikator liniowy na samym końcu
+        # Final linear classifier
         self.classifier = nn.Sequential(
-            nn.Flatten(), # Spłaszczamy: (32, 2, 2) -> (128,)
-            nn.Linear(128, 128), # Poprawione: nn.Linear(32*2*2, 128)
+            nn.Flatten(), # Flatten: (32, 2, 2) -> (128,)
+            nn.Linear(128, 128), # Corrected: nn.Linear(32*2*2, 128)
             nn.ReLU(),
             nn.Linear(128, 10)
         )
 
     def forward(self, x):
-        # x na wejściu ma kształt (Batch, 1, 28, 28)
+        # x input shape: (Batch, 1, 28, 28)
         x = self.features(x)
         logits = self.classifier(x)
         return logits

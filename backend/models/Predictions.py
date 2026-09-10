@@ -9,15 +9,15 @@ class Predictions(BASE):
 
     id = Column(Integer, primary_key=True, index=True)
     
-    # Dane o predykcji i poprawce
-    predicted_digit = Column(Integer, nullable=False) # Co model wytypował
-    correct_digit = Column(Integer, nullable=False)   # Prawdziwa cyfra (etykieta użytkownika)
-    confidence = Column(Float, nullable=True)         # Pewność modelu (np. 0.87)
-    is_correct = Column(Boolean, nullable=False)      # 1 jeśli poprawna predykcja, 0 jeśli błędna
+    # Prediction and correction data
+    predicted_digit = Column(Integer, nullable=False) # What the model predicted
+    correct_digit = Column(Integer, nullable=False)   # True digit (user label)
+    confidence = Column(Float, nullable=True)         # Model confidence (e.g. 0.87)
+    is_correct = Column(Boolean, nullable=False)      # 1 if prediction is correct, 0 if incorrect
     
-    # Lokalizacja pliku (zamiast BLOB)
+    # File location (instead of BLOB)
     image_path = Column(String(512), nullable=False)  # np. "s3://my-bucket/digits/2026-08-12_abc123.png"
     
-    # Metadane MLOps
+    # MLOps metadata
     model_version = Column(String(50), nullable=False) # np. "mnist_v1.2.0"
-    created_at = Column(DateTime(timezone=True), server_default=func.now()) # Data zdarzenia
+    created_at = Column(DateTime(timezone=True), server_default=func.now()) # Event timestamp

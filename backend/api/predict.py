@@ -14,7 +14,7 @@ router = APIRouter()
 @router.post("/predict")
 async def predict(drawing: UploadFile = File(...)):
     if not drawing.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Przesłany plik nie jest obrazem")
+        raise HTTPException(status_code=400, detail="Uploaded file is not an image")
 
     try:
         img_bytes = await drawing.read()
@@ -22,7 +22,7 @@ async def predict(drawing: UploadFile = File(...)):
         prediction, confidence = predict_digit(img_bytes) 
 
         print('===================')
-        print(f'PREDYKCJA: {prediction}')
+        print(f'PREDICTION: {prediction}')
         print('===================\n')
 
         return {
@@ -31,16 +31,16 @@ async def predict(drawing: UploadFile = File(...)):
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Błąd serwera: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
 
 
 
 @router.post("/save-img")
-async def review_prediction( # nazwy zmiennych muszą zgadzać się z tym co jest przesyłane frontendu
-    # 1. Odbieranie pliku
+async def review_prediction( # variable names must match what frontend sends
+    # 1. Receive file
     drawing: UploadFile = File(...),
     
-    # 2. Odbieranie pojedynczych pól z formularza
+    # 2. Receive individual form fields
     prediction: int = Form(...),
     confidence: float = Form(...),
     correct_digit: int = Form(...),
@@ -48,22 +48,22 @@ async def review_prediction( # nazwy zmiennych muszą zgadzać się z tym co jes
     db: Session = Depends(get_db)
 ):
     if not drawing.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="Plik nie jest obrazem")
+        raise HTTPException(status_code=400, detail="File is not an image")
     
     try:
-        # Odczytanie obrazu
+        # Read image
         img_bytes = await drawing.read()
 
         save_img(img_bytes=img_bytes, prediction=prediction, confidence=confidence, correct_digit=correct_digit, db=db)
 
-        # Zwracamy odpowiedź do frontendu
+        # Return response to frontend
         return {
             "status": "success",
-            "message": "Dane poprawione przez użytkownika zostały zapisane."
+            "message": "User-corrected data has been saved."
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Błąd serwera: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
 
 
 
@@ -73,7 +73,7 @@ async def retrain(db: Session = Depends(get_db)):
         retrain_model(db=db)
         return {
             "status": "success",
-            "message": "Model został przetrenowany."
+            "message": "Model has been retrained."
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Błąd serwera: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
