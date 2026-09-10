@@ -1,0 +1,34 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: FastAPI",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "uvicorn",
+            "args": [
+                "backend.main:app",
+                "--reload"
+            ],
+            "jinja": true,
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/backend" // <--- TA LINIJKA URATUJE SYTUACJĘ
+            }
+        },
+        {
+            "name": "Vue: Opera GX (Attach)",
+            "type": "chrome",
+            "request": "attach",
+            "port": 9222,
+            "urlFilter": "http://localhost:5173*", // Filtr, który wskazuje, którą kartę w Operze debugować
+            "webRoot": "${workspaceFolder}/src",
+            "sourceMapPathOverrides": {
+                "webpack:///src/*": "${webRoot}/*",
+                "django:///*": "*"
+            }
+        }
+    ]
+}

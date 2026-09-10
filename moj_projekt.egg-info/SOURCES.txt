@@ -1,0 +1,10 @@
+pyproject.toml
+backend/database.py
+backend/main.py
+model_training/NeuralNetwork.py
+model_training/digit_recognision_model.py
+moj_projekt.egg-info/PKG-INFO
+moj_projekt.egg-info/SOURCES.txt
+moj_projekt.egg-info/dependency_links.txt
+moj_projekt.egg-info/requires.txt
+moj_projekt.egg-info/top_level.txt
