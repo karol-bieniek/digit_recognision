@@ -32,7 +32,7 @@ if __name__ == "__main__":
     train_dataloader = DataLoader(train_dataset, batch_size=64, shuffle=True)
     test_dataloader = DataLoader(test_dataset, batch_size=64, shuffle=True)
 
-    print(f"Pobrano {len(train_dataset)} obrazków treningowych.")
+    print(f"Downloaded {len(train_dataset)} training images.")
 
 
     device = torch.accelerator.current_accelerator().type if torch.accelerator.is_available() else "cpu"

@@ -11,31 +11,31 @@ from fastapi.middleware.cors import CORSMiddleware
 
 import backend.models
 
-# Automatycznie tworzy tabele w bazie
+# Automatically create database tables
 BASE.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
 
-# 2. Definiujemy listę adresów (origins), które mają mieć dostęp do naszego API
+# 2. Define list of origins allowed to access our API
 origins = [
-    "http://localhost:5173",  # Domyślny adres dla projektów Vue (Vite) lub React
-    "http://localhost:5174",  # Domyślny adres dla projektów Vue (Vite) lub React
-    "http://localhost:3000",  # Alternatywny port, np. starsze konfiguracje React / Next.js
-    "http://127.0.0.1:5173",  # Warto dodać również warianty z IP
+    "http://localhost:5173",  # Default address for Vue (Vite) or React projects
+    "http://localhost:5174",  # Default address for Vue (Vite) or React projects
+    "http://localhost:3000",  # Alternative port (e.g., older React / Next.js setups)
+    "http://127.0.0.1:5173",  # Include IP-based variant as well
 ]
 
 
 
-# 3. Podłączamy CORSMiddleware do naszej aplikacji FastAPI
+# 3. Attach CORSMiddleware to the FastAPI app
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,           # Zezwalaj na ruch tylko z tych adresów z listy wyżej
-    allow_credentials=True,          # Zezwalaj na przesyłanie plików cookie / sesji / autoryzacji
-    allow_methods=["*"],             # Zezwalaj na wszystkie metody HTTP (GET, POST, PUT, DELETE itp.)
-    allow_headers=["*"],             # Zezwalaj na wszystkie nagłówki (np. Content-Type, Authorization)
+    allow_origins=origins,           # Allow traffic only from the origins listed above
+    allow_credentials=True,          # Allow cookies / session / auth data
+    allow_methods=["*"],             # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],             # Allow all headers (e.g., Content-Type, Authorization)
 )
 
 
-# Opcjonalnie możemy dodać prefix, np. prefix="/api"
+# Optionally add a router prefix, e.g. prefix="/api"
 app.include_router(predict_router)

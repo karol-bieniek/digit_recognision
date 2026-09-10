@@ -16,33 +16,33 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 
-// Referencja do elementu HTML <canvas>
+// Reference to the HTML <canvas> element
 const canvasRef = ref(null);
 let ctx = null;
 
-// Stan określający, czy użytkownik aktualnie rysuje
+// State that indicates whether the user is currently drawing
 const isDrawing = ref(false);
 
-// Przechowywanie ostatnich współrzędnych myszy
+// Store last mouse coordinates
 let lastX = 0;
 let lastY = 0;
 
 
 
-// Inicjalizacja tła i parametrów pędzla
+// Initialize background and brush settings
 const resetCanvasWithWhiteBackground = () => {
   const canvas = canvasRef.value;
   if (!canvas) return;
   
   ctx = canvas.getContext('2d');
 
-  // Fizycznie wypełniamy płótno białym kolorem (rozwiązuje problem przezroczystości)
+  // Fill the canvas with white to avoid transparency issues
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Ustawienia pędzla dostosowane do skali MNIST (grubość 35px)
-  ctx.strokeStyle = '#000000'; // Czysta czerń
-  ctx.lineWidth = 35;           // Gruba linia (odpowiednik ~2px po przeskalowaniu do 28x28)
+  // Brush settings adjusted for MNIST scale (35px thickness)
+  ctx.strokeStyle = '#000000'; // Pure black
+  ctx.lineWidth = 35;           // Thick line (~2px after scaling to 28x28)
   ctx.lineCap = 'round';       
   ctx.lineJoin = 'round';      
 };
@@ -51,13 +51,13 @@ onMounted(() => {
   resetCanvasWithWhiteBackground();
 });
 
-// Rozpoczęcie rysowania
+// Start drawing
 const startDrawing = (event) => {
   isDrawing.value = true;
   [lastX, lastY] = [event.offsetX, event.offsetY];
 };
 
-// Rysowanie linii podczas ruchu myszy
+// Draw line while moving the mouse
 const draw = (event) => {
   if (!isDrawing.value) return;
 
@@ -69,12 +69,12 @@ const draw = (event) => {
   [lastX, lastY] = [event.offsetX, event.offsetY];
 };
 
-// Zakończenie rysowania
+// Stop drawing
 const stopDrawing = () => {
   isDrawing.value = false;
 };
 
-// Czyszczenie całego płótna (i ponowne wypełnienie na biało)
+// Clear entire canvas (and refill with white)
 const clearCanvas = () => {
   resetCanvasWithWhiteBackground();
 };
@@ -84,7 +84,7 @@ const getCanvas = () => {
 }
 
 
-// Dla rodzica
+// Expose methods to parent
 defineExpose({
   clearCanvas,
   getCanvas,

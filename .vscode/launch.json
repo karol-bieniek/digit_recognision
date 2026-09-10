@@ -15,7 +15,7 @@
             ],
             "jinja": true,
             "env": {
-                "PYTHONPATH": "${workspaceFolder}/backend" // <--- TA LINIJKA URATUJE SYTUACJĘ
+                "PYTHONPATH": "${workspaceFolder}/backend" // <--- this line is essential
             }
         },
         {
@@ -23,7 +23,7 @@
             "type": "chrome",
             "request": "attach",
             "port": 9222,
-            "urlFilter": "http://localhost:5173*", // Filtr, który wskazuje, którą kartę w Operze debugować
+            "urlFilter": "http://localhost:5173*", // Filter selecting the Opera debug tab
             "webRoot": "${workspaceFolder}/src",
             "sourceMapPathOverrides": {
                 "webpack:///src/*": "${webRoot}/*",

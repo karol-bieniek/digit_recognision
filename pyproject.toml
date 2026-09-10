@@ -5,9 +5,9 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "moj_projekt"
 version = "0.1.0"
-dependencies = ["numpy", "torch"] # tutaj możesz wpisać np. numpy, torch itp.
+dependencies = ["numpy", "torch"] # list dependencies here, e.g. numpy, torch
 
 
 [tool.setuptools]
-# Wpisz tutaj tylko te foldery, z których importujesz kod w Pythonie
+# List only folders from which you import Python code
 packages = ["model_training", "backend"]
