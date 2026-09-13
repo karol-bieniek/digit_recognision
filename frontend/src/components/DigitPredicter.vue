@@ -118,7 +118,8 @@ const handleRetrain = async () => {
   } catch (error) {
     console.log("Training error: ", error);
   } finally {
-    isRetraining.value = false; 
+    isRetraining.value = false;
+    alert("Model has been retrained successfully!");
   }
 }
 

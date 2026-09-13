@@ -1,4 +1,3 @@
-# main.py
 from dotenv import load_dotenv
 load_dotenv(override=True)
 
@@ -37,5 +36,4 @@ app.add_middleware(
 )
 
 
-# Optionally add a router prefix, e.g. prefix="/api"
 app.include_router(predict_router)

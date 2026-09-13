@@ -82,7 +82,6 @@ def save_img(img_bytes: bytes, prediction: int, confidence: float, correct_digit
     img_size = len(img_bytes)
 
     try:
-        # 4. Upload file to MinIO
         minio_client.put_object(
             bucket_name=BUCKET_NAME,
             object_name=drawing_name,
@@ -100,7 +99,6 @@ def save_img(img_bytes: bytes, prediction: int, confidence: float, correct_digit
         raise
 
     except SQLAlchemyError as e:
-        # 3. If DATABASE raises an error, roll back transaction to avoid blocking it
         db.rollback() 
         print(f"Database error (SQLAlchemy): {e}")
         raise

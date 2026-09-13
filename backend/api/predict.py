@@ -21,10 +21,6 @@ async def predict(drawing: UploadFile = File(...)):
 
         prediction, confidence = predict_digit(img_bytes) 
 
-        print('===================')
-        print(f'PREDICTION: {prediction}')
-        print('===================\n')
-
         return {
             "prediction": prediction,
             "confidence": confidence 
@@ -37,10 +33,8 @@ async def predict(drawing: UploadFile = File(...)):
 
 @router.post("/save-img")
 async def review_prediction( # variable names must match what frontend sends
-    # 1. Receive file
     drawing: UploadFile = File(...),
     
-    # 2. Receive individual form fields
     prediction: int = Form(...),
     confidence: float = Form(...),
     correct_digit: int = Form(...),
@@ -51,12 +45,10 @@ async def review_prediction( # variable names must match what frontend sends
         raise HTTPException(status_code=400, detail="File is not an image")
     
     try:
-        # Read image
         img_bytes = await drawing.read()
 
         save_img(img_bytes=img_bytes, prediction=prediction, confidence=confidence, correct_digit=correct_digit, db=db)
 
-        # Return response to frontend
         return {
             "status": "success",
             "message": "User-corrected data has been saved."
