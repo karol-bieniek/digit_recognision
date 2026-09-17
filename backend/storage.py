@@ -7,7 +7,7 @@ import os
 
 # MinIO client configuration
 minio_client = Minio(
-    os.getenv("MINIO_URL"),          # Address of your MinIO server
+    os.getenv("MINIO_URL"),          # Address of your MinIO server # type: ignore
     access_key=os.getenv("MINIO_LOGIN"),   # Your login (Access Key)
     secret_key=os.getenv("MINIO_PASSWORD"),   # Your password (Secret Key)
     secure=False               # False when testing locally without HTTPS
@@ -15,8 +15,6 @@ minio_client = Minio(
 
 BUCKET_NAME = "drawings"
 
-if not minio_client.bucket_exists(BUCKET_NAME):
-    minio_client.make_bucket(BUCKET_NAME)
 
 
 

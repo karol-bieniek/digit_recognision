@@ -4,16 +4,28 @@ load_dotenv(override=True)
 
 from fastapi import FastAPI
 from backend.database import engine, BASE
+from contextlib import asynccontextmanager
 
 from backend.api.predict import router as predict_router
 from fastapi.middleware.cors import CORSMiddleware
 
+
+# For creating
 import backend.models
+from backend.storage import minio_client, BUCKET_NAME
 
 # Automatically create database tables
 BASE.metadata.create_all(bind=engine)
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if not minio_client.bucket_exists(BUCKET_NAME):
+        minio_client.make_bucket(BUCKET_NAME)
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 
 
 # 2. Define list of origins allowed to access our API

@@ -1,6 +1,6 @@
 <script setup>
 
-import { ref, onMounted } from 'vue';
+import { ref } from 'vue';
 import { sendImgDigit, saveCanvas, retrain } from '../../api/predict.ts';
 import Canvas from './Canvas.vue';
 import { getCanvasBlob } from '../utils';
@@ -15,7 +15,6 @@ const canvasActions = ref(null);
 
 
 const isReview = ref(false);
-const isSuccess = ref(false);
 const correctNumber = ref(null);
 
 const isRetraining = ref(false);
@@ -69,15 +68,13 @@ const handleYes = async () => {
   } catch (error) {
       console.error('Network error:', error);
   }
-
+  prediction.value = null;
   isReview.value = false;
-  isSuccess.value = true;
 }
 
 
 const handleNo = () => {
   isReview.value = true;
-  isSuccess.value = false;
 }
 
 
@@ -102,8 +99,8 @@ const handleReview = async () => {
     if (response === null) {
       alert("Server error");
     } else {
+      prediction.value = null;
       isReview.value = false;
-      isSuccess.value = true;
     }
   } catch (error) {
     console.error('Network error:', error);
@@ -136,7 +133,7 @@ const handleRetrain = async () => {
 
       <!-- Canvas control buttons -->
       <div class="controls">
-        <button @click="clearCanvas" class="btn btn-clear">
+        <button @click="clearCanvas(); prediction = null" class="btn btn-clear">
           <span class="btn-icon">✕</span> Clear
         </button>
         <button @click="uploadImage" class="btn btn-save">
@@ -166,9 +163,9 @@ const handleRetrain = async () => {
     <div class="modal-overlay" v-if="prediction !== null">
       <div class="modal-content">
 
-        <h3 class="modal-title" v-if="!isReview && !isSuccess">Was the digit recognized correctly?</h3>
+        <h3 class="modal-title" v-if="!isReview">Was the digit recognized correctly?</h3>
         <!-- Yes/No buttons -->
-        <div class="modal-actions" v-if="!isReview && !isSuccess">
+        <div class="modal-actions" v-if="!isReview">
 
           <button type="button" @click="handleYes" class="btn btn-success">Yes, it's correct</button>
           <button type="button" @click="handleNo" class="btn btn-warning">No, correct it</button>
@@ -194,14 +191,6 @@ const handleRetrain = async () => {
           </div>
         </form>
 
-        <!-- Success confirmation -->
-        <div class="success-message" v-if="isSuccess">
-          <p class="success-text">✓ Thanks for your feedback!</p>
-          <p class="success-subtitle">Your input helps improve model training</p>
-          <div class="success-actions">
-            <button type="button" @click="isSuccess = false; prediction = null" class="btn btn-primary">Close</button>
-          </div>
-        </div>
       </div>
     </div>
       <div>
@@ -461,7 +450,6 @@ const handleRetrain = async () => {
   box-shadow: var(--shadow-lg);
   max-width: 600px;
   width: 100%;
-  animation: slideDown 0.3s ease;
   border: 2px solid var(--border-color);
 }
 
@@ -578,31 +566,6 @@ const handleRetrain = async () => {
 
 .form-actions .btn {
   flex: 1;
-}
-
-/* ==================== SUCCESS MESSAGE ==================== */
-.success-message {
-  text-align: center;
-  padding: 1rem;
-}
-
-.success-text {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--success-color);
-  margin: 0 0 0.5rem 0;
-}
-
-.success-subtitle {
-  color: var(--text-muted);
-  margin: 0 0 1.5rem 0;
-  font-size: 0.9rem;
-}
-
-.success-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
 }
 
 /* ==================== RESPONSIVE ==================== */
