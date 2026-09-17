@@ -17,12 +17,15 @@ trap cleanup SIGINT SIGTERM
 clear
 
 echo "Starting minio server..."
-tmux new-session -d -s minio -c "$PROJECT_ROOT/minio_data" "bash -c 'sudo ./run_minio.sh; exec bash'"
+tmux new-session -d -s minio -c "$PROJECT_ROOT/minio_data"
+tmux send-keys -t minio "echo '123' | sudo -S ./run_minio.sh" C-m
 
 sleep 5  # Wait for minio to start
 
+
 echo "Starting fastapi server..."
-tmux new-session -d -s fastapi -c "$PROJECT_ROOT" "bash -c 'sudo $PROJECT_ROOT/venv/bin/fastapi dev backend/main.py; exec bash'"
+tmux new-session -d -s fastapi -c "$PROJECT_ROOT"
+tmux send-keys -t fastapi "echo '123' | sudo -S $PROJECT_ROOT/venv/bin/fastapi dev backend/main.py" C-m
 
 
 echo "Starting vue frontend server..."
