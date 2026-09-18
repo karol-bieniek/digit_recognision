@@ -8,7 +8,7 @@ on:
       - main
 
 jobs:
-  build-and-test:
+  backend-tests:
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository
@@ -29,4 +29,4 @@ jobs:
       - name: Run backend tests
         run: |
           ls
-          pytest backend/tests/
+          pytest -m backend/tests/
