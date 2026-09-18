@@ -3,3 +3,4 @@ data
 moj_pro
 .env 
 minio_data
+.vscode

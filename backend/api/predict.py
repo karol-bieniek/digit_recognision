@@ -13,7 +13,7 @@ router = APIRouter()
 
 @router.post("/predict")
 async def predict(drawing: UploadFile = File(...)):
-    if not drawing.content_type.startswith("image/"):
+    if not drawing.content_type or not drawing.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="Uploaded file is not an image")
 
     try:
@@ -41,7 +41,7 @@ async def review_prediction( # variable names must match what frontend sends
 
     db: Session = Depends(get_db)
 ):
-    if not drawing.content_type.startswith("image/"):
+    if not drawing.content_type or not drawing.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="File is not an image")
     
     try:

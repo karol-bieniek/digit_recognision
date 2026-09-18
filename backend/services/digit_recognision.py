@@ -1,3 +1,5 @@
+from typing import cast
+
 import torch
 import io
 import uuid
@@ -13,7 +15,7 @@ from PIL import Image
 
 from torchvision import transforms
 from torch.utils.data import TensorDataset, ConcatDataset, DataLoader
-from torch import nn
+from torch import Tensor, nn
 
 
 from sqlalchemy.exc import SQLAlchemyError
@@ -32,10 +34,11 @@ preprocess = transforms.Compose([
     transforms.Grayscale(num_output_channels=1), # Convert to 1 channel (black and white)
     transforms.Resize((28, 28)),                 # Force size to 28x28
     transforms.ToTensor(),                       # Convert to tensor with values in [0.0, 1.0]
-])
+]) 
 
 
-def predict_digit(img_bytes) -> tuple[int, float]:
+
+def predict_digit(img_bytes: bytes) -> tuple[int, float]:
     
     with Image.open(io.BytesIO(img_bytes)) as img:
         # Convert RGBA to RGB with forced white background
@@ -46,7 +49,7 @@ def predict_digit(img_bytes) -> tuple[int, float]:
         elif img.mode != 'RGB':
             img = img.convert('RGB')
 
-        img_tensor = preprocess(img)
+        img_tensor = cast(Tensor, preprocess(img))
 
         img_tensor = 1.0 - img_tensor
 
@@ -58,13 +61,13 @@ def predict_digit(img_bytes) -> tuple[int, float]:
         with torch.no_grad():
             logits = NN_MODEL(img_tensor)
             probabilities = torch.softmax(logits, dim=1)
-            prediction = torch.argmax(probabilities, dim=1).item()
-            confidence = probabilities[0][prediction].item()    # index 0 because torch output is batched
+            prediction = int(torch.argmax(probabilities, dim=1).item())
+            confidence = float(probabilities[0][prediction].item())    # index 0 because torch output is batched
 
 
         confidence = round(confidence*100, 2)
 
-    return prediction, confidence
+    return (prediction, confidence)
 
 
 
@@ -100,6 +103,7 @@ def save_img(img_bytes: bytes, prediction: int, confidence: float, correct_digit
 
     except SQLAlchemyError as e:
         db.rollback() 
+        minio_client.remove_object(bucket_name=BUCKET_NAME, object_name=drawing_name)
         print(f"Database error (SQLAlchemy): {e}")
         raise
 
