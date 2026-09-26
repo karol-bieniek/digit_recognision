@@ -25,7 +25,6 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -37,12 +36,28 @@ jobs:
           cache: 'pip'
 
       - name: Start MinIO
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
         run: |
-          ls
-          cd minio_data
-          mkdir -p minio_data_temp
-          ls
-          ./minio/minio server ./minio_data_temp --console-address ":9001" &
+          curl -fsSL https://dl.min.io/server/minio/release/linux-amd64/minio \
+            -o /tmp/minio
+          chmod +x /tmp/minio
+          mkdir -p /tmp/minio-data
+          /tmp/minio server /tmp/minio-data \
+            --address ":9000" \
+            --console-address ":9001" \
+            >/tmp/minio.log 2>&1 &
+
+          for attempt in {1..30}; do
+            if curl -fsS http://localhost:9000/minio/health/live >/dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+
+          cat /tmp/minio.log
+          exit 1
 
       - name: Install dependencies
         run: |

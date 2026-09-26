@@ -3,4 +3,5 @@ data
 moj_pro
 .env 
 minio_data
+postgres_data
 .vscode
