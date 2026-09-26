@@ -10,6 +10,36 @@ on:
 jobs:
   backend-tests:
     runs-on: ubuntu-latest
+
+    services:
+      minio:
+        image: minio/minio # Docker image for MinIO
+        ports:
+          - 9000:9000
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_ROOT_PASSWORD: minioadmin
+        options: >-
+          --health-cmd "curl -f http://localhost:9000/minio/health/live || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        command: server /data
+
+      postres:
+        image: postgres:15
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: digit_recognizer_db
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -27,9 +57,11 @@ jobs:
           pip install pytest
 
       - name: Run backend tests
-        env:
-          PYTHONPATH: .
-          DATABASE_URL: sqlite:///test.db
+        env: 
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+          MINIO_LOGIN: minioadmin
+          MINIO_PASSWORD: minioadmin
+          MINIO_URL: "localhost:9000"
         run: |
           ls
           pytest backend/tests/
