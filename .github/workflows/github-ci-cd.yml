@@ -13,7 +13,7 @@ jobs:
 
     services:
       minio:
-        image: minio/minio # Docker image for MinIO
+        image: quay.io/minio/minio # Docker image for MinIO
         ports:
           - 9000:9000
         env:
