@@ -38,6 +38,7 @@ jobs:
 
       - name: Start MinIO
         run: |
+          ls
           cd minio_data
           mkdir -p minio_data_temp
           ls
