@@ -11,3 +11,14 @@ dependencies = ["numpy", "torch"] # list dependencies here, e.g. numpy, torch
 [tool.setuptools]
 # List only folders from which you import Python code
 packages = ["model_training", "backend"]
+
+[tool.ruff.lint.flake8-bugbear]
+# Ignoruje błąd B008 dla specyficznych funkcji FastAPI
+extend-immutable-calls = [
+    "fastapi.Depends", 
+    "fastapi.Query", 
+    "fastapi.Path", 
+    "fastapi.Body",
+    "fastapi.File",
+    "fastapi.Form"
+]

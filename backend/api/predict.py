@@ -1,15 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.orm import Session
-import io
-from PIL import Image 
 
 from backend.database import get_db
-from backend.models.Predictions import Predictions
 
-
-from ..services.digit_recognision import predict_digit, save_img, retrain_model
+from ..services.digit_recognision import predict_digit, retrain_model, save_img
 
 router = APIRouter()
+
 
 @router.post("/predict")
 async def predict(drawing: UploadFile = File(...)):
@@ -19,53 +16,46 @@ async def predict(drawing: UploadFile = File(...)):
     try:
         img_bytes = await drawing.read()
 
-        prediction, confidence = predict_digit(img_bytes) 
+        prediction, confidence = predict_digit(img_bytes)
 
-        return {
-            "prediction": prediction,
-            "confidence": confidence 
-        }
+        return {"prediction": prediction, "confidence": confidence}
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
-
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=f"Server error: {e!s}")
 
 
 @router.post("/save-img")
-async def review_prediction( # variable names must match what frontend sends
+async def review_prediction(  # variable names must match what frontend sends
     drawing: UploadFile = File(...),
-    
     prediction: int = Form(...),
     confidence: float = Form(...),
     correct_digit: int = Form(...),
-
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     if not drawing.content_type or not drawing.content_type.startswith("image/"):
         raise HTTPException(status_code=400, detail="File is not an image")
-    
+
     try:
         img_bytes = await drawing.read()
 
-        save_img(img_bytes=img_bytes, prediction=prediction, confidence=confidence, correct_digit=correct_digit, db=db)
+        save_img(
+            img_bytes=img_bytes,
+            prediction=prediction,
+            confidence=confidence,
+            correct_digit=correct_digit,
+            db=db,
+        )
 
-        return {
-            "status": "success",
-            "message": "User-corrected data has been saved."
-        }
+        return {"status": "success", "message": "User-corrected data has been saved."}
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
-
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=f"Server error: {e!s}")
 
 
 @router.get("/retrain")
 async def retrain(db: Session = Depends(get_db)):
     try:
         retrain_model(db=db)
-        return {
-            "status": "success",
-            "message": "Model has been retrained."
-        }
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Server error: {str(e)}")
+        return {"status": "success", "message": "Model has been retrained."}
+    except Exception as e:  # noqa: BLE001
+        raise HTTPException(status_code=500, detail=f"Server error: {e!s}")

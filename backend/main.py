@@ -1,18 +1,17 @@
 from dotenv import load_dotenv
+
 load_dotenv(override=True)
 
 
-from fastapi import FastAPI
-from backend.database import engine, BASE
 from contextlib import asynccontextmanager
 
-from backend.api.predict import router as predict_router
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-
 # For creating
-import backend.models
-from backend.storage import minio_client, BUCKET_NAME
+from backend.api.predict import router as predict_router
+from backend.database import BASE, engine
+from backend.storage import BUCKET_NAME, minio_client
 
 # Automatically create database tables
 BASE.metadata.create_all(bind=engine)
@@ -37,14 +36,13 @@ origins = [
 ]
 
 
-
 # 3. Attach CORSMiddleware to the FastAPI app
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,           # Allow traffic only from the origins listed above
-    allow_credentials=True,          # Allow cookies / session / auth data
-    allow_methods=["*"],             # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
-    allow_headers=["*"],             # Allow all headers (e.g., Content-Type, Authorization)
+    allow_origins=origins,  # Allow traffic only from the origins listed above
+    allow_credentials=True,  # Allow cookies / session / auth data
+    allow_methods=["*"],  # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
+    allow_headers=["*"],  # Allow all headers (e.g., Content-Type, Authorization)
 )
 
 

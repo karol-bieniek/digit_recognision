@@ -1,22 +1,18 @@
-from minio import Minio
 import io
-from PIL import Image, ImageOps
-import torchvision.transforms as transforms
 import os
 
+from minio import Minio
+from PIL import Image, ImageOps
 
 # MinIO client configuration
 minio_client = Minio(
-    os.getenv("MINIO_URL"),          # Address of your MinIO server # type: ignore
-    access_key=os.getenv("MINIO_LOGIN"),   # Your login (Access Key)
-    secret_key=os.getenv("MINIO_PASSWORD"),   # Your password (Secret Key)
-    secure=False               # False when testing locally without HTTPS
+    os.getenv("MINIO_URL"),  # Address of your MinIO server # type: ignore
+    access_key=os.getenv("MINIO_LOGIN"),  # Your login (Access Key)
+    secret_key=os.getenv("MINIO_PASSWORD"),  # Your password (Secret Key)
+    secure=False,  # False when testing locally without HTTPS
 )
 
 BUCKET_NAME = "drawings"
-
-
-
 
 
 def get_image(bucket_name: str, object_name: str):
