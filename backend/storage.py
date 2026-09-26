@@ -2,6 +2,7 @@ import io
 import os
 
 from minio import Minio
+from minio.error import S3Error
 from PIL import Image, ImageOps
 
 # MinIO client configuration
@@ -24,6 +25,6 @@ def get_image(bucket_name: str, object_name: str):
         image = image.convert("L")
         return ImageOps.invert(image)
 
-    except Exception as e:
+    except (S3Error, OSError) as e:
         print(f"Error while downloading image from MinIO: {e}")
         return None

@@ -4,7 +4,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 # Format: postgresql://uzytkownik:haslo@host:port/database_name
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL: str  = str(os.getenv("DATABASE_URL"))
+
 
 # Engine manages PostgreSQL connections
 engine = create_engine(DATABASE_URL)
