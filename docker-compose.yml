@@ -32,7 +32,7 @@ services:
       - ./postgres_data:/var/lib/postgresql/data
 
   storage:
-      image: minio/minio:latest
+      image: quay.io/minio/minio:latest
       ports:
         - "9000:9000" # Port for the application (backend)
         - "9001:9001" # Port for browser access (Web UI)
