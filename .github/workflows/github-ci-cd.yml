@@ -29,7 +29,8 @@ jobs:
           pip install pytest
 
       - name: Run backend tests
-        env: 
+        env:
+          PYTHONPATH: . 
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/digit_recognizer_db
           MINIO_LOGIN: minioadmin
           MINIO_PASSWORD: minioadmin
