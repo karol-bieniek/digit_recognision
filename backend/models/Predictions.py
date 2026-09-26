@@ -1,3 +1,5 @@
+from typing import ClassVar
+
 from sqlalchemy import Boolean, DateTime, Float, String
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.sql import func
@@ -7,7 +9,7 @@ from backend.database import BASE
 
 class Predictions(BASE):
     __tablename__ = "predictions"
-    __table_args__ = {"extend_existing": True}
+    __table_args__: ClassVar[dict] = {"extend_existing": True}
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
 

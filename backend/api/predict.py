@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from minio.error import S3Error
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
@@ -20,7 +22,11 @@ async def predict(drawing: UploadFile = File(...)):
 
         return {"prediction": prediction, "confidence": confidence}
 
-    except Exception as e:  # noqa: BLE001
+    except OSError as e:
+        raise HTTPException(status_code=500, detail=f"Server error: {e!s}")
+    except ValueError as e:
+        raise HTTPException(status_code=500, detail=f"Server error: {e!s}")
+    except RuntimeError as e:
         raise HTTPException(status_code=500, detail=f"Server error: {e!s}")
 
 
@@ -48,7 +54,7 @@ async def review_prediction(  # variable names must match what frontend sends
 
         return {"status": "success", "message": "User-corrected data has been saved."}
 
-    except Exception as e:  # noqa: BLE001
+    except (OSError, ValueError, RuntimeError, S3Error, SQLAlchemyError) as e:
         raise HTTPException(status_code=500, detail=f"Server error: {e!s}")
 
 
@@ -57,5 +63,5 @@ async def retrain(db: Session = Depends(get_db)):
     try:
         retrain_model(db=db)
         return {"status": "success", "message": "Model has been retrained."}
-    except Exception as e:  # noqa: BLE001
+    except (OSError, ValueError, RuntimeError, S3Error, SQLAlchemyError) as e:
         raise HTTPException(status_code=500, detail=f"Server error: {e!s}")
