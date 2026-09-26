@@ -13,7 +13,7 @@ jobs:
 
     services:
       minio:
-        image: quay.io/minio/minio # Docker image for MinIO
+        image: bitnami/minio:latest
         ports:
           - 9000:9000
         env:
@@ -24,9 +24,8 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-        command: server /data
 
-      postres:
+      postgres:
         image: postgres:15
         ports:
           - 5432:5432
@@ -58,7 +57,7 @@ jobs:
 
       - name: Run backend tests
         env: 
-          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/digit_recognizer_db
           MINIO_LOGIN: minioadmin
           MINIO_PASSWORD: minioadmin
           MINIO_URL: "localhost:9000"
